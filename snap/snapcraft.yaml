@@ -1,0 +1,32 @@
+name: rustscan
+base: core18
+adopt-info: rustscan
+summary: RustScan
+description: |
+  The Modern Port Scanner.
+  Fast, smart, effective.
+
+grade: stable
+confinement: strict
+
+parts:
+  rustscan:
+    plugin: rust
+    source: https://github.com/RustScan/RustScan.git
+    source-tag: "2.0.1"
+    build-packages:
+      - build-essential
+      - pkg-config
+    stage-packages:
+      - nmap
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version "$(git describe --tags | tr -d 'v')"
+
+apps:
+  rustscan:
+    command: bin/rustscan
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas
+    plugs:
+      - network
