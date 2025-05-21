@@ -1,5 +1,5 @@
 name: rustscan
-base: core18
+base: core22
 adopt-info: rustscan
 summary: RustScan
 description: |
