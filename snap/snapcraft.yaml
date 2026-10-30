@@ -14,9 +14,28 @@ parts:
     plugin: rust
     source: https://github.com/RustScan/RustScan.git
     source-tag: 2.4.1
+    override-pull: |
+      craftctl default
+      # Upstream's 2.4.1 tag still declares 2.3.0 in Cargo.toml. Keep the
+      # embedded CLI version aligned with the release tag we actually build.
+      python3 - <<'PY'
+      import os
+      import re
+      from pathlib import Path
+      path = Path('Cargo.toml')
+      text = path.read_text()
+      package = re.search(r'(?ms)^\[package\]\n(.*?)(?=^\[|\Z)', text)
+      assert package, 'missing Cargo package section'
+      section, count = re.subn(r'(?m)^version = "[^"]+"$',
+                              'version = "' + os.environ['SNAPCRAFT_PROJECT_VERSION'] + '"',
+                              package.group(1))
+      assert count == 1, 'ambiguous Cargo package version'
+      path.write_text(text[:package.start(1)] + section + text[package.end(1):])
+      PY
     build-packages:
       - build-essential
       - pkg-config
+      - python3
     stage-packages:
       - nmap
 
